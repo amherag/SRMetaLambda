@@ -1,0 +1,43 @@
+\begin{thebibliography}{1}\setlength{\itemsep}{-1ex}\small
+
+\bibitem{ml3}
+K.~S. Jones.
+\newblock A statistical interpretation of term specificity and its application
+  in retrieval.
+\newblock {\em Journal of Documentation}, 28:11--21, 1972.
+
+\bibitem{ml1}
+S.~Kawaguchi, P.~Garg, M.~Matsushita, and K.~Inoue.
+\newblock Mudablue: an automatic categorization system for open source
+  repositories.
+\newblock In {\em Software Engineering Conference, 2004. 11th Asia-Pacific},
+  pages 184--193, 2004.
+
+\bibitem{ml6}
+C.~D. Manning, P.~Raghavan, and H.~Sch\"{u}tze.
+\newblock {\em Introduction to Information Retrieval}.
+\newblock Cambridge University Press, New York, NY, USA, 2008.
+
+\bibitem{ml7}
+M.~B. Marko A.~Rodriguez.
+\newblock Titan: Distributed graph database.
+\newblock http://thinkaurelius.github.io/titan/, June 2013.
+
+\bibitem{ml2}
+C.~McMillan, M.~Grechanik, and D.~Poshyvanyk.
+\newblock Detecting similar software applications.
+\newblock In {\em Software Engineering (ICSE), 2012 34th International
+  Conference on}, pages 364--374, 2012.
+
+\bibitem{ml5}
+M.~S. . V.~K. P.-N.~Tan.
+\newblock {\em Introduction to Data Mining}.
+\newblock Addison-Wesley, 2005.
+
+\bibitem{ml4}
+A.~Singhal.
+\newblock Modern information retrieval: a brief overview.
+\newblock {\em Bulletin of the IEEE Computer Society Technical Committee on
+  Data Engineering}, 24:2001, 2001.
+
+\end{thebibliography}

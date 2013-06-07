@@ -1,0 +1,446 @@
+
+% 
+% $Description: Author guidelines and sample document in LaTeX 2.09$
+% 
+% $Author: Amaury Hernandez Aguila $
+% $Date: 2013/6/4 15:20:59 $
+% $Revision: 1.4 $
+% 
+
+\documentclass[times, 10pt,twocolumn, a4paper]{article}
+\usepackage{latex8}
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[spanish]{babel}
+
+% \documentstyle[times,art10,twocolumn,latex8]{article}
+
+% -------------------------------------------------------------------------
+% take the % away on next line to produce the final camera-ready version
+\pagestyle{empty}
+
+% -------------------------------------------------------------------------
+\begin{document}
+
+\title{Sistema de Recomendaci\'on de Librer\'ias de C\'odigo Fuente
+  basado en Tf-idf y Similitud por Coseno}
+
+\author{Amaury Hern\'andez \'Aguila\\
+  Instituto Tecnol\'ogico de Tijuana\\
+  Maestr\'ia en Ciencias Computacionales\\
+  amherag@gmail.com\\
+  % For a paper whose authors are all at the same institution,
+  % omit the following lines up until the closing ``}''.
+  % Additional authors and addresses can be added with ``\and'',
+  % just like the second author.
+}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+
+%\begin{figure}[ht!]
+%\centering
+%\includegraphics[width=40mm]{logo.png}
+%\caption{MetaLambda Logo}
+%\label{metalambda}
+%\end{figure}
+
+%  \({n+1\choose 3}\)
+%  \(\theta\)
+% \ref{metalambda}
+
+%\(a  \cdot b = \parallel a \parallel. \parallel a \parallel cos \theta\)
+
+
+
+  Se cre\'o un sistema de recomendaci\'on de librer\'ias de c\'odigo
+  fuente de Common Lisp. El sistema tambi\'en est\'a hecho en Common
+  Lisp. Se utilizan los m\'etodos tf-idf (\textit{Term frequency -
+    Inverse document frequency}) y similitud de cosenos para
+  comparar los c\'odigos fuentes y las documentaciones entre paquetes
+  (librer\'ias). Adem\'as se utiliza una adaptaci\'on del tf-idf y
+  similitud de cosenos que calcula la similitud entre dos paquetes
+  tomando en consideraci\'on el uso de otras librer\'ias dentro de
+  este paquete. El resultado del sistema de recomendaci\'on es una
+  lista de paquetes similares al paquete del usuario junto con las librer\'as recomendadas.
+\end{abstract}
+
+\begin{center}
+\textbf{Palabras clave:} sistema de recomendaci\'on, similitud de
+c\'odigo fuente, tf-idf, similitud por coseno, metalambda
+\end{center}
+
+% -------------------------------------------------------------------------
+\Section{Introducci\'on}
+
+La mayor\'ia de los sistemas cuyo enfoque es encontrar la similitud
+entre c\'odigos fuente tienen como finalidad la detecci\'on de
+plagiarismo. En este trabajo se presenta una forma de utilizar estas
+medidas de similitud para hacer un sistema de recomendaci\'on de
+c\'odigo fuente, espec\'ificamente de librer\'ias de Common Lisp.
+
+Un desarrollador puede utilizar este sistema de recomendaci\'on para
+encontrar paquetes que sean similares al suyo, o paquetes que
+podr\'ian ser de utilidad para su proyecto.
+
+La utilidad de un sistema de recomendaci\'on como este s\'olamente se
+presenta si se tiene a nuestra disposici\'on una gran colecci\'on de
+librer\'as las cuales podamos procesar f\'acilmente. Especialmente,
+nuestro sistema de recomendaci\'on necesita una forma de determinar de
+qu\'e librer\'ia proviene cualquier definici\'on (funciones,
+variables, etc.) siendo usada en un paquete. Esto no presenta un
+problema para nuestro sistema de recomendaci\'on, ya que Common Lisp
+nos da la posibilidad de obtener el paquete de donde provienen los
+s\'imbolos en un programa.
+
+El sistema de recomendaci\'on utiliza el promedio de tres m\'etricas para
+determinar la similitud entre un paquete y otro. De cada paquete se
+extrae las documentaciones de sus funciones, su c\'odigo fuente
+excluyendo las documentaciones de sus funciones, y la usabilidad de
+cada librer\'ia en el paquete. \'Este \'ultimo se refiere a la
+cantidad de veces que un paquete est\'a usando alguna funci\'on,
+m\'etodo, clase, variable, etc. (o s\'imbolo, en t\'erminos de Common
+Lisp) de cierta librer\'ia; entre mayor sea la cantidad de s\'imbolos
+externos siendo usados en el paquete, mayor ser\'a la usabilidad de
+esa librer\'ia dentro de ese paquete.
+
+La similitud entre documentaciones y c\'odigo fuente de los paquetes
+se obtiene utilizando una implementaci\'on de los m\'etodos tf-idf y
+similitud de cosenos. Utilizando tf-idf se obtiene un vector con las
+frecuencias de las palabras en cada documentaci\'on y c\'odigo fuente, y con
+similitud de cosenos obtenemos la similitud entre los vectores
+obtenidos en el paso anterior con tf-idf.
+
+El utilizar estas tres m\'etricas diferentes ayuda enormemente a que
+el sistema de recomendaci\'on reconozca mejor las necesidades del
+paquete. Es frecuente que los desarrolladores olviden u omitan
+deliberativamente la documentaci\'on de sus proyectos, sin embargo,
+qu\'e paquetes est\'an siendo utilizados son datos que est\'an
+\'implicitos en el c\'odigo, as\'i como el c\'odigo mismo.
+
+\Section{Motivacion}
+\label{Motivacion}
+
+Este proyecto sirve como un prototipo de un sistema de recomendaci\'on
+que ser\'a implementado en la plataforma de programaci\'on en l\'inea de
+MetaLambda.
+
+MetaLambda es esencialmente un servicio de \textit{hosting} y una
+plataforma de desarrollo de software de prop\'osito general
+colaborativa.
+
+Las librer\'ias en MetaLambda son construidas por los mismos usuarios
+de la plataforma, por lo que la colecci\'on de paquetes que pueden ser
+incluidas en los proyectos de los usuarios es enorme. Varias
+herramientas est\'an siendo desarrolladas para facilitarle la
+b\'usqueda de librer\'ias y paquetes al usuario, como un motor de
+b\'usqueda, y este mismo sistema de recomendaci\'ion de librer\'ias.
+
+Common Lisp es el mismo lenguaje de programaci\'on que est\'a siendo
+usado para desarrollar MetaLambda, as\'i que se decidi\'o utilizarlo
+tambi\'en para nuestro sistema de
+recomendaci\'on.
+
+% -------------------------------------------------------------------------
+\Section{Trabajos Previos}
+
+Hay numerosos trabajos relacionados con la detecci\'on de similitud en
+c\'odigos fuente, sin embargo, hay dos trabajos que tienen bastante
+similitud con mi trabajo, CLAN \cite{ml1} y MUDABlue \cite{ml2} cuyo objetivo es encontrar software similar
+dentro de un repositorio. La finalidad de nuestro sistema es diferente a la
+de estos dos trabajos, pero comparten similitud en los procesos, ya
+que todos se encargan de encontrar software similar.
+
+\Section{Modelo Propuesto}
+
+El modelo que proponemos en este trabajo se basa en en los m\'etodos
+de tf-idf y similitud de cosenos para encontrar la similitud entre
+paquetes de software. Las caracter\'isticas utilizadas que ser\'ian m\'as
+intuitivas son la comparaci\'on entre las documentaciones de los
+paquetes y la comparaci\'on entre los c\'odigos fuentes. La tercera
+m\'etrica es la menos intuitiva y m\'as innovadora, ya que se hace una
+adaptaci\'on de los m\'etodos tf-idf y similitud de cosenos tomando
+como datos la frecuencia de utilizaci\'on de funciones de las
+diferentes librer\'ias incluidas en el paquete.
+
+Otras caracter\'isticas pueden ser usadas en este sistema, pero se
+decidi\'o tomar estas tres para iniciar este prototipo, ya que
+consideramos que son las m\'as relevantes.
+
+% -------------------------------------------------------------------------
+\SubSection{Tf-idf}
+
+El m\'etodo tf-idf, descrito en \cite{ml3}, tiene como finalidad determinar la relevancia de un
+t\'ermino en un documento con respecto a una colecci\'on de documentos
+o \textit{corpus}. Este m\'etodo f\'acilmente puede ser adaptado para
+que calcule un vector con la relevancia de cada una de las palabras
+presentes en cierto documento, y de esta forma se pueden realizar
+comparaciones entre dos documentos.
+
+Este m\'etodo consiste en en el producto de dos estad\'isticas \cite{ml5}: \textit{tf} o
+\textit{term frequency} e \textit{idf} o \textit{inverse document
+  frequency}. Para la estad\'istica \textit{tf}, el m\'etodo debe
+calcular la frecuencia de un t\'ermino en un s\'olo documento. La
+forma m\'as simple ser\'ia determinar las veces que un t\'ermino
+aparece en un documento. Sin embargo, existen otras posibilidades
+\cite{ml6}, como una forma booleana, en la si el t\'ermino est\'a
+presente en el documento, sin importar el n\'umero de veces, \(tf(t,d)
+= 1\), donde \(t\) es el t\'ermino y \(d\) es el documento. Este es el
+camino que tomamos para determinar la frecuencia \(tf\) en nuestra
+m\'etodo. La estad\'istica \textit{idf} es una medida que determina
+qu\'e tan com\'un es cierto t\'ermino en todo el \textit{corpus}. Para
+calcular esta medida utilizamos la ecuaci\'on
+
+\begin{align}
+  idf(t,D) = log {\vert D \vert \over \vert \{ d\in D : t \in d\}\vert }
+\end{align}
+
+en donde \(t\) es el t\'ermino del cual deseamos obtener la relevancia
+dentro del \textit{corpus}, \(D\), \(\vert D \) es la cardinalidad de
+\(D\) o el n\'umero total de documentos, y \( \vert d \in D : t \in d
+\vert \) es el n\'umero de documentos dentro de \(D\) en los que
+ocurre el t\'ermino \(t\). \( tf(t, d) \ne 0 \) ya que ocurrir\'ia una
+divisi\'on entre 0; una soluci\'on com\'un a esto es ajustar la
+f\'ormula a \( \vert d \in D : t \in d \vert + 1 \), pero en nuestro
+m\'etodo decidimos implementar la condici\'on de que si \( tf(t, d) =
+0 \), entonces \( tf := 1 \).
+
+La similitud entre dos c\'odigos fuentes y las documentaciones de dos
+paquetes es llevada a cabo utilizando una implementaci\'on del
+m\'etodo tf-idf.
+
+Para medir la relevancia entre el uso de diferentes
+librer\'ias en dos paquetes diferentes, se usa este mismo m\'etodo,
+pero adapt\'andolo para que en lugar de utilizar t\'erminos en formato
+de cadena de caracteres, utilice el idetificador o nombre de un
+paquete. La frecuencia del uso de estas librer\'as es obtenida
+determinando el n\'umero de funciones de cada librer\'ia presentes en
+el c\'odigo fuente del paquete. As'\i, si una librer\'ia
+que est\'a siendo incluida en el paquete, pero ninguna de sus
+funciones forma parte de la estructura del c\'odigo fuente,
+ser\'ia equivalente a una situaci\'on en la que no est\'a siendo usada
+dicha librer\'ia. Al igual que la implementaci\'on del m\'etodo tf-idf
+para medir la similitud entre las documentaciones y el c\'odigo
+fuente, esta implementaci\'on regresa un vector que califica el uso de
+cada librer\'ia presente en un paquete.
+
+\SubSection{Similitud por coseno}
+
+Habiendo obtenido los vectores resultantes de la aplicaci\'on del
+m\'etodo tf-idf, podemos utilizar el m\'etodo de similitud por coseno
+para determinar qu\'e tan similares son dos paquetes \cite{ml4} de
+acuerdo a las tres caracter\'isticas que estamos tomando en
+consideraci\'on.
+
+La similitud por coseno puede ser obtenida a trav\'es de la ecuaci\'on
+
+\begin{equation} \label{similarity}
+  cos(\theta ) = {{A \cdot B} \over {\Vert A \Vert \Vert B \Vert}}
+\end{equation}
+
+donde \( cos(\theta ) \) representa a la similitud entre los vectores
+\(A\) y \(B\), \(A \cdot B\) es el producto punto de ambos vectores y
+\({\Vert A \Vert \Vert B \Vert}\) es el producto de la magnitud de los
+vectores \(A\) y \(B\). El producto punto de dos vectores \(a\) y
+\(b\) esta definido como
+
+\begin{align}
+  {a \cdot b} = \sum_{i=1}^n a_i b_i = a_1 b_1 + a_2 b_2 + \dots + a_n
+  b_n = a b^T
+\end{align}
+
+y la magnitud de un vector \(x\) como
+
+\begin{align}
+  {\Vert x \Vert} = \sqrt{x_1 ^2 + x_2 ^2 + \dots + x_n ^2}.
+\end{align}
+
+De esta forma, podemos reescribir \eqref{similarity} como
+
+\begin{equation}
+  cos(\theta ) = { {\sum_{i=1}^n A_i B_i} \over {\sqrt{\sum_{i=1}^n
+        (A_i) ^ 2} \sqrt{\sum_{i=1}^n (B_i) ^ 2}}}
+\end{equation}
+
+y resulta f\'acil implementar el m\'etodo utilizando ciclos que iteren
+por cada uno de nuestros vectores resultantes del \textit{tf-idf}
+aplicado a los documentos siendo comparados.
+
+Una vez calculada la similitud por coseno entre los vectores de dos
+documentos, el resultado es un escalar \(r \in \Re\), donde \( 0 \leq
+r \leq 1 \), y \(r\) nos representa una calificaci\'on de la similitud
+entre los dos documentos.
+
+\SubSection{Promedio de calificaciones}
+\label{Promedio}
+
+En nuestro m\'etodo aplicamos similitud por coseno a los vectores
+resultantes del \textit{tf-idf}, pero este m\'etodo tiene que ser
+aplicado tres veces, una vez a cada una de nuestras
+caracter\'isticas. Por lo tanto, el resultado sigue siendo un vector
+que contiene las tres calificaciones por cada una de las
+caracter\'isticas.
+
+Para poder encontrar las librer\'ias que tengan mayor similitud con
+nuestro paquete, es m\'as conveniente trabajar con una calificaci\'on
+escalar que vectorial. En este trabajo se opt\'o por utilizar el
+promedio de las tres calificaciones finales. As\'i que
+
+\begin{equation}
+  {similitud(P_D, P_S, P_L)} = {{cos(\theta_D) + cos(\theta_S) +
+      cos(\theta_L)} \over 3},
+\end{equation}
+
+donde \(P_D\), \(P_S\) y \(P_L\) son la documentaci\'on, el c\'odigo
+fuente y la frecuencia de uso de las librer\'ias en los paquetes
+siendo comparados. As\'i, obtenemos como resultado final la
+similitud \(s \in \Re\), donde \( 0 \leq s \leq 1 \).
+
+Podr\'iamos utilizar otro m\'etodo para reducir nuestro vector de
+calificaciones a un escalar, pero este m\'etodo resulta ser suficiente
+para este prototipo. Notablemente, podr\'iamos realizar esta misma
+operaci\'on de un promedio de las calificaciones, pero utilizando una
+ponderaci\'on. Los pesos utilizados en la ponderaci\'on pueden ser
+optimizados mediante alg\'un algoritmo de optimizaci\'on, tal como un
+algoritmo gen\'etico, y esto llevar\'ia a un sistema de
+recomendaci\'on m\'as efectivo.
+
+\SubSection{Recomendaci\'on de paquetes}
+
+Al darle al sistema de recomendaci\'on nuestro paquete, esperamos que
+nos recomiende otros paquetes o librer\'ias. Utilizando el promedio de
+calificaciones podemos obtener una lista de calificaciones de
+similitud de nuestro paquete con respecto a cada uno de los paquetes
+en el \textit{corpus}. Sin embargo, la recomendaci\'on de los paquetes
+que son similares al nuestro puede no ser la mejor respuesta para el
+usuario, ya que el sistema simplemente nos est\'a estableciendo
+cu\'ales paquetes son los m\'as similares a nuestro paquete. La
+soluci\'on que se toma es dar como resultado las librer\'ias que
+utilizaron los paquetes similares al nuestro, excluyendo aquellos
+paquetes que ya estamos utilizando en nuestro proyecto.
+
+\Section{Trabajos futuros}
+\label{Futuros}
+
+El estado actual de este sistema de recomendaci\'on no es apto para
+ser aplicado a un proyecto en producci\'on. Hay varios problemas que
+son notorios.
+
+Un gran problema es que los vectores generados por el m\'etodo
+\textit{tf-idf} conservan las calificaciones de aquellos t\'erminos
+que no estuvieron presentes en el documento, pero que s\'i lo
+estuvieron en el \textit{corpus}. Esto podr\'ia ser beneficioso cuando
+se aplica a la caracter\'istica de la frecuencia de uso de librer\'ias
+en el paquete, ya que el que dos paquetes no usen cierta librer\'ia
+puede ser considerada una semejanza. Sin embargo, no deber\'ian ser de
+utilidad alguna cuando el m\'etodo es aplicado a las documentaciones y
+a los c\'odigos fuente de los paquetes.
+
+Otro problema es que el sistema de recomendaci\'on presenta en los
+resultados cada uno de los paquetes dentro del \textit{corpus}
+excluyendo al paquete siendo comparado. En una colecci\'on de paquetes
+peque\~na no representar\'ia un problema grande pero, conforme crece
+la colecci\'on de paquetes, la lista de resultados podr\'ia ser
+dif\'icil de interpretar por el usuario.
+
+En la lista de paquetes que se arroja como resultado del sistema, se
+le presentan al usuario cada uno de los paquetes dentro de la
+colecci\'on de paquetes junto con su porcentaje de similaridad. Como
+se ha mencionado dentro del planteamiento del sistema, estos paquetes
+similares no representan un resultado de utilidad para el usuario. Una
+mejor estimaci\'on de recomendaciones para nuestro paquete puede ser
+la suma de los productos de la semejanza de cada uno de los paquetes
+del \textit{corpus} con respecto a nuestro
+paquete, con el \(tf-idf(t,d,D)\) de cada una de las librer\'ias
+siendo usadas por cada uno de los paquetes similares, donde \(t\) es cada uno de las
+librer\'ias que est\'an en uso en el paquete similar al nuestro, \(d\)
+es cada uno de los paquetes similares al nuestro, y \(D\) es nuestra
+colecci\'on de paquetes o \textit{corpus}.
+
+Una vez que el sistema de recomendaci\'on est\'e en una forma m\'as
+robusta, debe ser implementado en la plataforma de MetaLambda,
+explicada en la secci\'on \ref{Motivacion}. Como caracter\'isticas
+m\'as importantes, nuestro sistema de recomendaci\'on debe ser
+adaptado para trabajar con la base de datos de grafos \textit{Titan}
+\cite{ml7}, y el sistema deber\'ia extraer autom\'aticamente los
+paquetes de los cuales pertenecen las funciones que forman parte de la
+estructura de los paquetes - tarea que es f\'acilmente lograda gracias
+a Common Lisp.
+
+Sin duda alguna, el trabajo m\'as urgente es crear un m\'etodo que nos
+permita medir la efectividad del sistema de recomendaci\'on. Un
+m\'etodo propuesto por el Doctor Mario Garc\'ia Valdez, del Instituto
+Tecnol\'ogico de Tijuana, es tomar una muestra de paquetes del
+\textit{corpus} y eliminar el uso de algunas librer\'ias en los
+paquetes de la muestra. Si el sistema es capaz de recomendar las
+librer\'ias que fueron eliminadas, entonces se encuentra en la
+direcci\'on correcta. Podemos utilizar el porcentaje de
+recomendaci\'on descrito en esta misma secci\'on como medida de rendimiento.
+
+\Section{Conclusiones}
+
+La pieza central de nuestro sistema de recomendaci\'on es el m\'etodo
+\textit{tf-idf}. Gracias a este m\'etodo resulta muy f\'acil encontrar
+similitudes entre documentos tomando en consideraci\'on una gran
+variedad de caracter\'isticas, y puede ser adaptado de una forma
+muy simple. Adem\'as de esta simplicidad, el \textit{tf-idf} es muy
+versatil, ya que hay muchas posibilidades de encontrar las
+estad\'isticas \textit{tf} y \textit{idf}. Estamos seguros de que la
+modificaci\'on de este m\'etodo es vital para el descubrimiento de
+maneras m\'as efectivas de obtener mejores resultados.
+
+Adem\'as de la modificaci\'on del m\'etodo \textit{tf-idf}, un \'area
+de investigaci\'on que se abre para nosotros es la elecci\'on de las
+caracter\'isticas a considerar. Gracias a las grandes cantidades de
+informaci\'on sobre el c\'odigo fuente y los usuarios que es
+almacenada en la plataforma MetaLambda, se abre la posibilidad de
+crear un sistema de recomendaci\'on m\'as robusto y refinado.
+
+Una parte importante del sistema de recomendaci\'on a la cual no se le
+dio la importancia necesaria fue a la secci\'on \ref{Promedio}. El
+m\'etodo elegido - simplemente promediar los valores de las
+calificaciones del \textit{tf-idf} en el vector - es una soluci\'on
+demasiado burda. Podr\'iamos utilizar alg\'un m\'etodo de
+optimizaci\'on para encontrar pesos para una ponderaci\'on de
+las calificaciones que nos den resultados m\'as significativos. Para
+poder lograr esto, es indispensable establecer un m\'etodo que nos
+ayude a probar el sistema, un trabajo que se encuentra actualmente en
+desarrollo, tal como mencionamos en la secci\'on \ref{Futuros}.
+
+Como conclusi\'on general, hemos podido desarrollar un prototipo que
+cumple satisfactoriamente con las necesidades iniciales de un sistema
+de recomendaci\'on de librer\'ias de c\'odigo fuente para la
+plataforma de MetaLambda.
+
+\Section{Agradecimientos}
+
+Quiero agradecer el apoyo de mi novia Elizabeth Quetzali Madera
+Hern\'andez, quien me ayud\'o con muchas ideas para mejorar este
+sistema de recomendaci\'on, adem\'as de ser un miembro vital del
+equipo de MetaLambda.
+
+Tambi\'en ha sido de gran importancia para m\'i tener el apoyo de
+CONACYT, el cual ha sido definitivo para que haya podido continuar con
+mis estudios de posgrado, as\'i como el apoyo de todos los catedr\'aticos del
+Instituto Tecnol\'ogico de Tijuana, especialmente al Doctor Mario
+Garc\'ia Valdez, quien contribuy\'o enormemente con su direcci\'on en
+este proyecto.
+
+% -------------------------------------------------------------------------
+%\footnote
+%{%
+%  Or, better still, try to avoid footnotes altogether.  To help your
+%  readers, avoid using footnotes altogether and include necessary
+%  peripheral observations in the text (within parentheses, if you
+%  prefer, as in this sentence).
+%}
+
+% -------------------------------------------------------------------------
+%\nocite{ml1,ml2}
+\bibliographystyle{latex8}
+\bibliography{latex8}
+
+\end{document}
